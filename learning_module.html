@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain RAG Öğrenme Modülü</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #6b7280;
+            font-size: 1.2em;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-tab {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px 25px;
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+        }
+
+        .card h3 {
+            color: var(--secondary);
+            margin: 25px 0 15px 0;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-block .comment {
+            color: #5c6370;
+        }
+
+        .code-block .keyword {
+            color: #c678dd;
+        }
+
+        .code-block .string {
+            color: #98c379;
+        }
+
+        .code-block .function {
+            color: #61afef;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table tr:hover {
+            background: var(--light);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin: 3px;
+        }
+
+        .badge-success { background: #d1fae5; color: var(--success); }
+        .badge-warning { background: #fef3c7; color: var(--warning); }
+        .badge-danger { background: #fee2e2; color: var(--danger); }
+        .badge-info { background: #dbeafe; color: var(--primary); }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            background: var(--light);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .flow-step::after {
+            content: '↓';
+            font-size: 2em;
+            color: var(--primary);
+            display: block;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .flow-step h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 102, 241, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin: 10px 0;
+            color: white;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+
+        /* Feature List */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 15px;
+            margin: 10px 0;
+            background: var(--light);
+            border-radius: 8px;
+            border-left: 4px solid var(--success);
+            transition: all 0.3s;
+        }
+
+        .feature-list li:hover {
+            transform: translateX(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid var(--border);
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .progress-step.completed .progress-step-circle {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        /* Architecture Diagram */
+        .architecture {
+            background: var(--light);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .architecture-layer {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .architecture-layer h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .architecture-arrow {
+            text-align: center;
+            font-size: 2em;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        /* Code Output */
+        .code-output {
+            background: #f0fdf4;
+            border: 2px solid var(--success);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .code-output .output-header {
+            color: var(--success);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Visual Comparison */
+        .visual-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-box {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .comparison-box.good {
+            background: #d1fae5;
+            border: 2px solid var(--success);
+        }
+
+        .comparison-box.bad {
+            background: #fee2e2;
+            border: 2px solid var(--danger);
+        }
+
+        .comparison-box h4 {
+            margin-bottom: 15px;
+        }
+
+        .comparison-box.good h4 {
+            color: var(--success);
+        }
+
+        .comparison-box.bad h4 {
+            color: var(--danger);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 80px;
+            margin-bottom: 30px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 18px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 4px solid white;
+            box-shadow: 0 0 0 4px var(--primary);
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .visual-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border-color: var(--primary);
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border-color: var(--success);
+            color: #065f46;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border-color: var(--warning);
+            color: #92400e;
+        }
+
+        /* Interactive Examples */
+        .interactive-demo {
+            background: var(--light);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .demo-button {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .demo-button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .demo-output {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 100px;
+            border: 2px dashed var(--border);
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 40px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        footer p {
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎓 LangChain RAG Öğrenme Modülü</h1>
+            <p>Kapsamlı RAG, Embeddings, Vector Database ve Agent Sistemleri Rehberi</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showSection('overview', this)">
+                📊 Genel Bakış
+            </div>
+            <div class="nav-tab" onclick="showSection('rag', this)">
+                🔍 RAG Sistemleri
+            </div>
+            <div class="nav-tab" onclick="showSection('embeddings', this)">
+                🧬 Embeddings
+            </div>
+            <div class="nav-tab" onclick="showSection('indexes', this)">
+                📚 Indexes
+            </div>
+            <div class="nav-tab" onclick="showSection('chromadb', this)">
+                💾 Chroma DB
+            </div>
+            <div class="nav-tab" onclick="showSection('tools', this)">
+                🛠️ Tool-based RAG
+            </div>
+            <div class="nav-tab" onclick="showSection('practice', this)">
+                🎯 Pratik Örnekler
+            </div>
+        </div>
+
+        <!-- Overview Section -->
+        <div id="overview" class="content-section active">
+            <div class="card">
+                <h2>📊 Öğrenme Yolculuğunuz</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <p>Toplam Modül</p>
+                        <h3>7</h3>
+                        <p>Konu Başlığı</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>Kod Örneği</p>
+                        <h3>15+</h3>
+                        <p>Çalışan Uygulama</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>Rehber Döküman</p>
+                        <h3>6</h3>
+                        <p>Detaylı Makale</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>Vector Database</p>
+                        <h3>126</h3>
+                        <p>İndekslenmiş Döküman</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>💡 İpucu:</strong> Bu modül, sıfırdan başlayıp production-ready RAG sistemleri geliştirmeye kadar tüm aşamaları kapsar.
+                </div>
+
+                <h3>🎯 Öğrenme Yolu</h3>
+                <div class="progress-steps">
+                    <div class="progress-step completed">
+                        <div class="progress-step-circle">1</div>
+                        <div>Basic RAG</div>
+                    </div>
+                    <div class="progress-step completed">
+                        <div class="progress-step-circle">2</div>
+                        <div>Embeddings</div>
+                    </div>
+                    <div class="progress-step completed">
+                        <div class="progress-step-circle">3</div>
+                        <div>Vector DB</div>
+                    </div>
+                    <div class="progress-step completed">
+                        <div class="progress-step-circle">4</div>
+                        <div>Indexes</div>
+                    </div>
+                    <div class="progress-step completed">
+                        <div class="progress-step-circle">5</div>
+                        <div>Tool-based</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="progress-step-circle">6</div>
+                        <div>Production</div>
+                    </div>
+                </div>
+
+                <h3>📁 Proje Yapısı</h3>
+                <div class="code-block">
+<span class="comment">LangChain/</span>
+├── <span class="string">RAG/</span>
+│   ├── basic_rag.py              <span class="comment"># 6 adımlı temel RAG</span>
+│   ├── simple_tool_rag.py        <span class="comment"># Tek tool ile agent</span>
+│   ├── multi_tool_rag.py         <span class="comment"># Çoklu tool sistemi</span>
+│   └── TOOL_BASED_RAG_REHBER.md <span class="comment"># Detaylı rehber</span>
+│
+├── <span class="string">EMBEDDINGS/</span>
+│   ├── embedding_models.py       <span class="comment"># 10 farklı model</span>
+│   ├── vector_databases.py       <span class="comment"># 13 DB karşılaştırması</span>
+│   └── embeddings_rehber.md     <span class="comment"># Kapsamlı rehber</span>
+│
+├── <span class="string">INDEXES/</span>
+│   ├── indexes_ornekleri.py      <span class="comment"># 9 adımlı demo</span>
+│   └── INDEXES_REHBER.md        <span class="comment"># Detaylı dokümantasyon</span>
+│
+└── <span class="string">CHROMA-DB/</span>
+    ├── chroma_explorer.py        <span class="comment"># DB analiz aracı</span>
+    ├── chroma_interactive.py     <span class="comment"># Terminal UI</span>
+    ├── chroma_web_viewer.py      <span class="comment"># Web arayüzü</span>
+    └── CHROMA_REHBER.md         <span class="comment"># Kullanım rehberi</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🏗️ RAG Sisteminin Mimarisi</h2>
+                
+                <div class="architecture">
+                    <div class="architecture-layer">
+                        <h4>1. Veri Kaynağı</h4>
+                        <p>Web, PDF, Dökümanlar, API'ler</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>2. Document Loader</h4>
+                        <p>WebBaseLoader, PyPDFLoader, DirectoryLoader</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>3. Text Splitter</h4>
+                        <p>RecursiveCharacterTextSplitter (chunk_size=1000)</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>4. Embedding Model</h4>
+                        <p>HuggingFace: all-mpnet-base-v2 (768 dim)</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>5. Vector Store (Index)</h4>
+                        <p>Chroma DB - 126 döküman, 90K+ karakter</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>6. Retriever</h4>
+                        <p>similarity_search(k=4)</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>7. LLM</h4>
+                        <p>Claude-3-Haiku (Anthropic)</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>8. Cevap</h4>
+                        <p>Context-aware, Accurate Response</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RAG Section -->
+        <div id="rag" class="content-section">
+            <div class="card">
+                <h2>🔍 RAG (Retrieval Augmented Generation)</h2>
+                
+                <div class="alert alert-info">
+                    <strong>RAG Nedir?</strong> LLM'lere kendi dökümanlarınızdan bilgi sağlayarak daha doğru ve güncel cevaplar üretmelerini sağlayan bir yöntem.
+                </div>
+
+                <h3>⚖️ Basic RAG vs Tool-based RAG</h3>
+                <div class="visual-comparison">
+                    <div class="comparison-box good">
+                        <h4>✅ Basic RAG</h4>
+                        <ul class="feature-list">
+                            <li>Basit ve hızlı</li>
+                            <li>Kolay kurulum</li>
+                            <li>6 adımda çalışır</li>
+                            <li>Tek kaynak kullanır</li>
+                        </ul>
+                        <div class="code-block">
+<span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> Chroma
+
+vectorstore = Chroma.from_documents(
+    documents=docs,
+    embedding=embeddings
+)
+                        </div>
+                    </div>
+
+                    <div class="comparison-box good">
+                        <h4>🚀 Tool-based RAG</h4>
+                        <ul class="feature-list">
+                            <li>Akıllı karar mekanizması</li>
+                            <li>Çoklu kaynak desteği</li>
+                            <li>Agent-driven</li>
+                            <li>Esnek ve güçlü</li>
+                        </ul>
+                        <div class="code-block">
+<span class="keyword">from</span> langgraph.prebuilt <span class="keyword">import</span> create_react_agent
+
+agent = create_react_agent(
+    model, 
+    [retriever_tool, calc_tool, time_tool]
+)
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📝 Basic RAG - 6 Adım</h3>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <h4>Adım 1: Veri Yükleme</h4>
+                        <div class="code-block">
+<span class="keyword">from</span> langchain_community.document_loaders <span class="keyword">import</span> WebBaseLoader
+
+loader = WebBaseLoader(<span class="string">"https://example.com"</span>)
+documents = loader.load()
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <h4>Adım 2: Parçalama (Chunking)</h4>
+                        <div class="code-block">
+<span class="keyword">from</span> langchain_text_splitters <span class="keyword">import</span> RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=<span class="string">1000</span>,
+    chunk_overlap=<span class="string">200</span>
+)
+splits = splitter.split_documents(documents)
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <h4>Adım 3: Embedding + Vector Store</h4>
+                        <div class="code-block">
+<span class="keyword">from</span> langchain_community.embeddings <span class="keyword">import</span> HuggingFaceEmbeddings
+<span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> Chroma
+
+embeddings = HuggingFaceEmbeddings(
+    model_name=<span class="string">"sentence-transformers/all-mpnet-base-v2"</span>
+)
+
+vectorstore = Chroma.from_documents(
+    documents=splits,
+    embedding=embeddings,
+    persist_directory=<span class="string">"./chroma_db"</span>
+)
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <h4>Adım 4: Retriever Oluşturma</h4>
+                        <div class="code-block">
+retriever = vectorstore.as_retriever(
+    search_kwargs={<span class="string">"k"</span>: <span class="string">4</span>}
+)
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <h4>Adım 5: Prompt Template</h4>
+                        <div class="code-block">
+<span class="keyword">from</span> langchain_core.prompts <span class="keyword">import</span> ChatPromptTemplate
+
+template = <span class="string">"""Aşağıdaki context'i kullanarak soruyu cevapla:
+
+Context: {context}
+
+Soru: {question}
+
+Cevap:"""</span>
+
+prompt = ChatPromptTemplate.from_template(template)
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <h4>Adım 6: RAG Chain</h4>
+                        <div class="code-block">
+<span class="keyword">from</span> langchain_anthropic <span class="keyword">import</span> ChatAnthropic
+
+llm = ChatAnthropic(model=<span class="string">"claude-3-haiku-20240307"</span>)
+
+chain = prompt | llm
+
+<span class="comment"># Kullanım</span>
+docs = retriever.invoke(<span class="string">"What is task decomposition?"</span>)
+response = chain.invoke({
+    <span class="string">"context"</span>: docs,
+    <span class="string">"question"</span>: <span class="string">"What is task decomposition?"</span>
+})
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📊 Gerçek Çıktı Örneği</h3>
+                <div class="code-output">
+                    <div class="output-header">✅ Soru: What is task decomposition?</div>
+                    <p><strong>Cevap:</strong></p>
+                    <p>Task decomposition is a technique used to break down complex tasks into smaller and simpler steps. This approach can be implemented through various methods:</p>
+                    <ul>
+                        <li><strong>Chain of Thought (CoT):</strong> Instructs the model to "think step by step"</li>
+                        <li><strong>Tree of Thoughts:</strong> Explores multiple reasoning possibilities at each step</li>
+                        <li><strong>LLM prompting:</strong> Using simple prompts like "Steps for XYZ" or "What are the subgoals for achieving XYZ?"</li>
+                    </ul>
+                    <p>This is particularly useful when dealing with complex problems that require structured planning and execution.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🛠️ Tool-based RAG</h2>
+                
+                <h3>🎯 Agent Karar Mekanizması</h3>
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <h4>1. Soru Analizi</h4>
+                        <p>Agent soruyu analiz eder: "Bu soru için hangi bilgi gerekiyor?"</p>
+                    </div>
+                    <div class="flow-step">
+                        <h4>2. Tool Seçimi</h4>
+                        <p>Mevcut tool'ların description'larını okur ve en uygununu seçer</p>
+                    </div>
+                    <div class="flow-step">
+                        <h4>3. Tool Çalıştırma</h4>
+                        <p>Seçilen tool(lar) ile bilgi toplar</p>
+                    </div>
+                    <div class="flow-step">
+                        <h4>4. Cevap Oluşturma</h4>
+                        <p>Toplanan bilgilerden tutarlı bir cevap üretir</p>
+                    </div>
+                </div>
+
+                <h3>🔧 Örnek: 3 Tool'lu Sistem</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain_core.tools <span class="keyword">import</span> tool, create_retriever_tool
+
+<span class="comment"># Tool 1: RAG Retriever</span>
+retriever_tool = create_retriever_tool(
+    retriever,
+    name=<span class="string">"search_ai_docs"</span>,
+    description=<span class="string">"AI agents hakkında bilgi için kullan"</span>
+)
+
+<span class="comment"># Tool 2: Calculator</span>
+<span class="function">@tool</span>
+<span class="keyword">def</span> <span class="function">calculator</span>(expression: str) -> str:
+    <span class="string">"""Matematik hesaplamaları için kullan"""</span>
+    <span class="keyword">return</span> str(eval(expression))
+
+<span class="comment"># Tool 3: Current Time</span>
+<span class="function">@tool</span>
+<span class="keyword">def</span> <span class="function">get_time</span>() -> str:
+    <span class="string">"""Güncel saat bilgisi için kullan"""</span>
+    <span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+    <span class="keyword">return</span> datetime.now().strftime(<span class="string">"%H:%M:%S"</span>)
+
+<span class="comment"># Agent oluştur</span>
+tools = [retriever_tool, calculator, get_time]
+agent = create_react_agent(model, tools)
+                </div>
+
+                <h3>🧪 Test Senaryoları</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Soru</th>
+                            <th>Kullanılan Tool</th>
+                            <th>Agent Düşüncesi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>"What is task decomposition?"</td>
+                            <td><span class="badge badge-info">search_ai_docs</span></td>
+                            <td>Bu AI konusu → RAG tool kullanmalıyım</td>
+                        </tr>
+                        <tr>
+                            <td>"What is 1234 * 56?"</td>
+                            <td><span class="badge badge-warning">calculator</span></td>
+                            <td>Matematik sorusu → Calculator tool</td>
+                        </tr>
+                        <tr>
+                            <td>"What time is it?"</td>
+                            <td><span class="badge badge-success">get_time</span></td>
+                            <td>Saat soruyorlar → Time tool</td>
+                        </tr>
+                        <tr>
+                            <td>"What is task decomposition and what is 100+50?"</td>
+                            <td><span class="badge badge-info">search_ai_docs</span> + <span class="badge badge-warning">calculator</span></td>
+                            <td>İki farklı bilgi → İki tool birden!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Embeddings Section -->
+        <div id="embeddings" class="content-section">
+            <div class="card">
+                <h2>🧬 Embeddings (Vektör Temsilleri)</h2>
+                
+                <div class="alert alert-info">
+                    <strong>Embedding Nedir?</strong> Metinleri anlamsal olarak temsil eden sayısal vektörlerdir. Benzer anlamlı kelimeler, benzer vektörlere sahip olur.
+                </div>
+
+                <h3>📐 Embedding Nasıl Çalışır?</h3>
+                <div class="visual-comparison">
+                    <div class="comparison-box good">
+                        <h4>📝 Metin</h4>
+                        <p style="font-size: 1.2em; margin: 20px 0;">
+                            "Python bir programlama dilidir"
+                        </p>
+                        <p>↓ Embedding Model ↓</p>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <code>[0.123, -0.456, 0.789, ..., 0.234]</code>
+                            <p style="margin-top: 10px; color: #6b7280;">768 boyutlu vektör</p>
+                        </div>
+                    </div>
+
+                    <div class="comparison-box good">
+                        <h4>🔍 Benzerlik Hesaplama</h4>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <p><strong>Soru:</strong> "programlama dili"</p>
+                            <p><strong>Döküman 1:</strong> "Python dil" → <span style="color: var(--success);">0.95 ✓</span></p>
+                            <p><strong>Döküman 2:</strong> "Elma meyve" → <span style="color: var(--danger);">0.12 ✗</span></p>
+                        </div>
+                        <p>Yüksek skor = Daha benzer!</p>
+                    </div>
+                </div>
+
+                <h3>🏆 Popüler Embedding Modelleri</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Boyut</th>
+                            <th>Dil</th>
+                            <th>Maliyet</th>
+                            <th>Kullanım</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>all-mpnet-base-v2</strong></td>
+                            <td>768</td>
+                            <td>İngilizce</td>
+                            <td><span class="badge badge-success">Ücretsiz</span></td>
+                            <td>Genel amaçlı, dengeli</td>
+                        </tr>
+                        <tr>
+                            <td><strong>text-embedding-ada-002</strong></td>
+                            <td>1536</td>
+                            <td>Çok dilli</td>
+                            <td><span class="badge badge-warning">Ücretli</span></td>
+                            <td>OpenAI, yüksek kalite</td>
+                        </tr>
+                        <tr>
+                            <td><strong>all-MiniLM-L6-v2</strong></td>
+                            <td>384</td>
+                            <td>İngilizce</td>
+                            <td><span class="badge badge-success">Ücretsiz</span></td>
+                            <td>Hızlı, hafif</td>
+                        </tr>
+                        <tr>
+                            <td><strong>multilingual-e5-large</strong></td>
+                            <td>1024</td>
+                            <td>100+ dil</td>
+                            <td><span class="badge badge-success">Ücretsiz</span></td>
+                            <td>Çok dilli projeler</td>
+                        </tr>
+                        <tr>
+                            <td><strong>cohere-embed-multilingual</strong></td>
+                            <td>768</td>
+                            <td>100+ dil</td>
+                            <td><span class="badge badge-warning">Ücretli</span></td>
+                            <td>Production, güvenilir</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>💻 Kod Örneği</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain_community.embeddings <span class="keyword">import</span> HuggingFaceEmbeddings
+
+<span class="comment"># Model yükle</span>
+embeddings = HuggingFaceEmbeddings(
+    model_name=<span class="string">"sentence-transformers/all-mpnet-base-v2"</span>,
+    model_kwargs={<span class="string">'device'</span>: <span class="string">'cpu'</span>},
+    encode_kwargs={<span class="string">'normalize_embeddings'</span>: <span class="keyword">True</span>}
+)
+
+<span class="comment"># Tek text</span>
+vector = embeddings.embed_query(<span class="string">"Python programlama dili"</span>)
+<span class="keyword">print</span>(f<span class="string">"Vektör boyutu: {len(vector)}"</span>)  <span class="comment"># 768</span>
+
+<span class="comment"># Çoklu text</span>
+texts = [<span class="string">"Python"</span>, <span class="string">"JavaScript"</span>, <span class="string">"Machine Learning"</span>]
+vectors = embeddings.embed_documents(texts)
+<span class="keyword">print</span>(f<span class="string">"Toplam: {len(vectors)} vektör"</span>)  <span class="comment"># 3</span>
+                </div>
+
+                <h3>📊 Embedding Kalite Karşılaştırması</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <p>all-mpnet-base-v2</p>
+                        <h3>93.2%</h3>
+                        <p>Accuracy</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>all-MiniLM-L6-v2</p>
+                        <h3>88.5%</h3>
+                        <p>Accuracy</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>text-ada-002</p>
+                        <h3>95.8%</h3>
+                        <p>Accuracy</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>multilingual-e5</p>
+                        <h3>92.1%</h3>
+                        <p>Accuracy</p>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>⚠️ Önemli:</strong> Embedding modeli değiştirirseniz, tüm vektörleri yeniden oluşturmalısınız! Index'teki tüm dökümanlar aynı modelle embedlenmelidir.
+                </div>
+            </div>
+        </div>
+
+        <!-- Indexes Section -->
+        <div id="indexes" class="content-section">
+            <div class="card">
+                <h2>📚 Indexes (İndeksler)</h2>
+                
+                <div class="alert alert-info">
+                    <strong>Index Nedir?</strong> Dökümanların organize edilmiş ve hızlı arama yapılabilir halidir. 
+                    Index = Documents + Embeddings + Vector Store
+                </div>
+
+                <h3>🧩 Index Bileşenleri</h3>
+                <div class="architecture">
+                    <div class="architecture-layer">
+                        <h4>📄 Documents</h4>
+                        <p>Metin içeriği + Metadata</p>
+                        <div class="code-block" style="text-align: left; margin-top: 10px;">
+Document(
+    page_content=<span class="string">"Python bir dildir"</span>,
+    metadata={<span class="string">"source"</span>: <span class="string">"doc.txt"</span>, <span class="string">"page"</span>: <span class="string">1</span>}
+)
+                        </div>
+                    </div>
+                    
+                    <div class="architecture-layer">
+                        <h4>🔢 Embeddings</h4>
+                        <p>Vektör temsilleri (768 boyutlu)</p>
+                        <div class="code-block" style="text-align: left; margin-top: 10px;">
+[0.123, -0.456, 0.789, ..., 0.234]
+                        </div>
+                    </div>
+                    
+                    <div class="architecture-layer">
+                        <h4>💾 Vector Store</h4>
+                        <p>Vektörleri saklar ve similarity search yapar</p>
+                        <div class="code-block" style="text-align: left; margin-top: 10px;">
+Chroma, FAISS, Pinecone, Weaviate, Qdrant
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🔍 Arama Yöntemleri</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Yöntem</th>
+                            <th>Açıklama</th>
+                            <th>Kullanım</th>
+                            <th>Örnek</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>similarity_search</strong></td>
+                            <td>En benzer k dökümanı döndürür</td>
+                            <td>Genel arama</td>
+                            <td><code>vectorstore.similarity_search("query", k=4)</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>similarity_search_with_score</strong></td>
+                            <td>Döküman + benzerlik skoru</td>
+                            <td>Skor bazlı filtreleme</td>
+                            <td><code>vectorstore.similarity_search_with_score("query")</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>mmr (Max Marginal Relevance)</strong></td>
+                            <td>Hem alakalı hem farklı sonuçlar</td>
+                            <td>Çeşitlilik gerektiğinde</td>
+                            <td><code>vectorstore.max_marginal_relevance_search("query")</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>similarity_score_threshold</strong></td>
+                            <td>Eşik değer üzeri sonuçlar</td>
+                            <td>Kaliteli sonuçlar için</td>
+                            <td><code>retriever(search_type="similarity_score_threshold")</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>💻 Index Oluşturma</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> Chroma
+<span class="keyword">from</span> langchain_community.embeddings <span class="keyword">import</span> HuggingFaceEmbeddings
+<span class="keyword">from</span> langchain_core.documents <span class="keyword">import</span> Document
+
+<span class="comment"># 1. Dökümanlar</span>
+documents = [
+    Document(page_content=<span class="string">"Python bir programlama dilidir"</span>),
+    Document(page_content=<span class="string">"JavaScript web için kullanılır"</span>),
+    Document(page_content=<span class="string">"Machine Learning AI'ın dalıdır"</span>)
+]
+
+<span class="comment"># 2. Embedding modeli</span>
+embeddings = HuggingFaceEmbeddings(
+    model_name=<span class="string">"sentence-transformers/all-mpnet-base-v2"</span>
+)
+
+<span class="comment"># 3. Index oluştur (tek satır!)</span>
+vectorstore = Chroma.from_documents(
+    documents=documents,
+    embedding=embeddings,
+    persist_directory=<span class="string">"./my_index"</span>
+)
+
+<span class="comment"># 4. Arama yap</span>
+results = vectorstore.similarity_search(<span class="string">"programlama"</span>, k=<span class="string">2</span>)
+<span class="keyword">for</span> doc <span class="keyword">in</span> results:
+    <span class="keyword">print</span>(doc.page_content)
+                </div>
+
+                <h3>🎯 Retriever Kullanımı</h3>
+                <div class="code-block">
+<span class="comment"># Retriever oluştur</span>
+retriever = vectorstore.as_retriever(
+    search_type=<span class="string">"similarity"</span>,  <span class="comment"># veya "mmr", "similarity_score_threshold"</span>
+    search_kwargs={<span class="string">"k"</span>: <span class="string">4</span>}
+)
+
+<span class="comment"># Kullan (çok basit!)</span>
+docs = retriever.invoke(<span class="string">"Python nedir?"</span>)
+
+<span class="comment"># RAG chain'de kullan</span>
+<span class="keyword">from</span> langchain.chains <span class="keyword">import</span> RetrievalQA
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever
+)
+                </div>
+
+                <h3>📊 Index İstatistikleri (Projenizden)</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <p>Toplam Döküman</p>
+                        <h3>126</h3>
+                        <p>İndekslenmiş</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>Toplam Karakter</p>
+                        <h3>90,524</h3>
+                        <p>Chunk'larda</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>Embedding Boyutu</p>
+                        <h3>768</h3>
+                        <p>Dimension</p>
+                    </div>
+                    <div class="stat-card">
+                        <p>Chunk Size</p>
+                        <h3>1000</h3>
+                        <p>Karakter</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chroma DB Section -->
+        <div id="chromadb" class="content-section">
+            <div class="card">
+                <h2>💾 Chroma DB - Vector Database</h2>
+                
+                <div class="alert alert-info">
+                    <strong>Chroma DB Nedir?</strong> Embedding vektörlerini saklamak ve similarity search yapmak için tasarlanmış açık kaynaklı bir vector database.
+                </div>
+
+                <h3>✨ Chroma DB Özellikleri</h3>
+                <ul class="feature-list">
+                    <li>Tamamen ücretsiz ve açık kaynak</li>
+                    <li>Yerel olarak çalışır (internet gerektirmez)</li>
+                    <li>Persistent storage (kalıcı depolama)</li>
+                    <li>Metadata filtreleme desteği</li>
+                    <li>Python, JavaScript SDK'ları</li>
+                    <li>Docker desteği</li>
+                    <li>Collection (koleksiyon) bazlı organizasyon</li>
+                    <li>Otomatik ID oluşturma</li>
+                </ul>
+
+                <h3>🚀 Hızlı Başlangıç</h3>
+                <div class="code-block">
+<span class="comment"># 1. Kurulum</span>
+pip install chromadb
+
+<span class="comment"># 2. Import</span>
+<span class="keyword">import</span> chromadb
+<span class="keyword">from</span> chromadb.config <span class="keyword">import</span> Settings
+
+<span class="comment"># 3. Client oluştur</span>
+client = chromadb.Client(Settings(
+    persist_directory=<span class="string">"./chroma_db"</span>,
+    is_persistent=<span class="keyword">True</span>
+))
+
+<span class="comment"># 4. Collection oluştur/al</span>
+collection = client.get_or_create_collection(
+    name=<span class="string">"my_collection"</span>
+)
+
+<span class="comment"># 5. Veri ekle</span>
+collection.add(
+    documents=[<span class="string">"Python bir dildir"</span>, <span class="string">"JS web içindir"</span>],
+    metadatas=[{<span class="string">"source"</span>: <span class="string">"doc1"</span>}, {<span class="string">"source"</span>: <span class="string">"doc2"</span>}],
+    ids=[<span class="string">"id1"</span>, <span class="string">"id2"</span>]
+)
+
+<span class="comment"># 6. Ara</span>
+results = collection.query(
+    query_texts=[<span class="string">"programlama dili"</span>],
+    n_results=<span class="string">2</span>
+)
+                </div>
+
+                <h3>🔧 Chroma ile LangChain Entegrasyonu</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> Chroma
+<span class="keyword">from</span> langchain_community.embeddings <span class="keyword">import</span> HuggingFaceEmbeddings
+
+<span class="comment"># Embedding modeli</span>
+embeddings = HuggingFaceEmbeddings(
+    model_name=<span class="string">"sentence-transformers/all-mpnet-base-v2"</span>
+)
+
+<span class="comment"># Chroma vector store</span>
+vectorstore = Chroma(
+    collection_name=<span class="string">"langchain"</span>,
+    embedding_function=embeddings,
+    persist_directory=<span class="string">"./chroma_db"</span>
+)
+
+<span class="comment"># Döküman ekle</span>
+vectorstore.add_documents(documents)
+
+<span class="comment"># Arama yap</span>
+results = vectorstore.similarity_search(<span class="string">"query"</span>, k=<span class="string">4</span>)
+                </div>
+
+                <h3>📊 Vector Database Karşılaştırması</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Özellik</th>
+                            <th>Chroma</th>
+                            <th>FAISS</th>
+                            <th>Pinecone</th>
+                            <th>Weaviate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Maliyet</strong></td>
+                            <td><span class="badge badge-success">Ücretsiz</span></td>
+                            <td><span class="badge badge-success">Ücretsiz</span></td>
+                            <td><span class="badge badge-warning">Ücretli</span></td>
+                            <td><span class="badge badge-success">Ücretsiz</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Deployment</strong></td>
+                            <td>Yerel / Cloud</td>
+                            <td>Yerel</td>
+                            <td>Cloud</td>
+                            <td>Yerel / Cloud</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ölçek</strong></td>
+                            <td>Küçük-Orta</td>
+                            <td>Büyük</td>
+                            <td>Çok Büyük</td>
+                            <td>Büyük</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Metadata Filtreleme</strong></td>
+                            <td>✅ Güçlü</td>
+                            <td>⚠️ Sınırlı</td>
+                            <td>✅ Güçlü</td>
+                            <td>✅ Çok Güçlü</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kurulum</strong></td>
+                            <td>⚡ Çok Kolay</td>
+                            <td>⚡ Kolay</td>
+                            <td>📝 API Key gerekir</td>
+                            <td>🔧 Orta</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hız</strong></td>
+                            <td>Orta</td>
+                            <td>⚡ Çok Hızlı</td>
+                            <td>⚡ Hızlı</td>
+                            <td>Hızlı</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Use Case</strong></td>
+                            <td>Prototip, Demo</td>
+                            <td>Yerel, Hız</td>
+                            <td>Production</td>
+                            <td>Hybrid Search</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>🛠️ Chroma Araçları (Projenizde)</h3>
+                <div class="visual-comparison">
+                    <div class="comparison-box good">
+                        <h4>🔍 chroma_explorer.py</h4>
+                        <p>Database analiz ve istatistik aracı</p>
+                        <ul style="text-align: left; margin-top: 15px;">
+                            <li>Toplam döküman sayısı</li>
+                            <li>Collection bilgileri</li>
+                            <li>Örnek aramalar</li>
+                            <li>Metadata dağılımı</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-box good">
+                        <h4>💻 chroma_interactive.py</h4>
+                        <p>Terminal tabanlı interaktif arayüz</p>
+                        <ul style="text-align: left; margin-top: 15px;">
+                            <li>Komut satırı arama</li>
+                            <li>Similarity skorları</li>
+                            <li>Metadata görüntüleme</li>
+                            <li>Real-time sorgular</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="visual-comparison">
+                    <div class="comparison-box good">
+                        <h4>🌐 chroma_web_viewer.py</h4>
+                        <p>Flask tabanlı web arayüzü</p>
+                        <ul style="text-align: left; margin-top: 15px;">
+                            <li>Web browser'da çalışır</li>
+                            <li>Görsel arama arayüzü</li>
+                            <li>Port 5000</li>
+                            <li>REST API</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-box good">
+                        <h4>⚡ chroma_quick_demo.py</h4>
+                        <p>Hızlı demo ve test scripti</p>
+                        <ul style="text-align: left; margin-top: 15px;">
+                            <li>Basit örnekler</li>
+                            <li>Temel operasyonlar</li>
+                            <li>Öğrenme amaçlı</li>
+                            <li>5 dakikada anla</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools Section -->
+        <div id="tools" class="content-section">
+            <div class="card">
+                <h2>🛠️ Tool-based RAG ve Multi-Tool Sistemler</h2>
+                
+                <div class="alert alert-info">
+                    <strong>Tool-based RAG Nedir?</strong> Agent'ın birden fazla araç (tool) arasından akıllıca seçim yaparak soruları cevapladığı gelişmiş RAG yaklaşımı.
+                </div>
+
+                <h3>⚡ Basic RAG vs Tool-based RAG</h3>
+                <div class="visual-comparison">
+                    <div class="comparison-box bad">
+                        <h4>❌ Basic RAG Problemi</h4>
+                        <p><strong>Soru:</strong> "What is 2 + 2?"</p>
+                        <p>↓</p>
+                        <p>Vector DB'de arama yapar</p>
+                        <p>↓</p>
+                        <p>"Matematik hakkında şu döküman var..."</p>
+                        <p>↓</p>
+                        <p>❌ Gereksiz arama, yanlış yaklaşım!</p>
+                        <div class="alert alert-warning" style="margin-top: 15px; text-align: left;">
+                            Her soru için <strong>her zaman</strong> vector DB'ye gider
+                        </div>
+                    </div>
+
+                    <div class="comparison-box good">
+                        <h4>✅ Tool-based RAG Çözümü</h4>
+                        <p><strong>Soru:</strong> "What is 2 + 2?"</p>
+                        <p>↓</p>
+                        <p>Agent düşünür: "Bu matematik!"</p>
+                        <p>↓</p>
+                        <p>Calculator tool'unu seçer</p>
+                        <p>↓</p>
+                        <p>✅ Cevap: 4</p>
+                        <div class="alert alert-success" style="margin-top: 15px; text-align: left;">
+                            Agent <strong>doğru tool'u</strong> akıllıca seçer
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🎯 Tool Tipleri</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Tool Tipi</th>
+                            <th>Kullanım Alanı</th>
+                            <th>Örnek</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Retriever Tool</strong></td>
+                            <td>Vector DB'den bilgi getirme</td>
+                            <td><code>search_ai_docs</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Calculator Tool</strong></td>
+                            <td>Matematiksel hesaplamalar</td>
+                            <td><code>calculator</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Time Tool</strong></td>
+                            <td>Güncel tarih/saat bilgisi</td>
+                            <td><code>get_current_time</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Web Search Tool</strong></td>
+                            <td>İnternet araması</td>
+                            <td><code>web_search</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>API Tool</strong></td>
+                            <td>External API çağrıları</td>
+                            <td><code>weather_api</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database Tool</strong></td>
+                            <td>SQL sorguları</td>
+                            <td><code>query_database</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>🏗️ Multi-Tool RAG Mimarisi</h3>
+                <div class="architecture">
+                    <div class="architecture-layer">
+                        <h4>Kullanıcı Sorusu</h4>
+                        <p>"What is task decomposition and what is 100 + 50?"</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>Agent Analizi</h4>
+                        <p>İki farklı bilgi türü tespit edildi:<br>
+                        1. AI konusu (task decomposition)<br>
+                        2. Matematik (100 + 50)</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>Tool Seçimi</h4>
+                        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
+                            <span class="badge badge-info">search_ai_docs</span>
+                            <span>+</span>
+                            <span class="badge badge-warning">calculator</span>
+                        </div>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>Bilgi Toplama</h4>
+                        <p>Tool 1: "Task decomposition is..."<br>
+                        Tool 2: "100 + 50 = 150"</p>
+                    </div>
+                    <div class="architecture-arrow">↓</div>
+                    
+                    <div class="architecture-layer">
+                        <h4>Cevap Sentezi</h4>
+                        <p>Her iki bilgiyi birleştirerek tutarlı cevap</p>
+                    </div>
+                </div>
+
+                <h3>💻 Multi-Tool RAG Kodu</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain_core.tools <span class="keyword">import</span> tool, create_retriever_tool
+<span class="keyword">from</span> langgraph.prebuilt <span class="keyword">import</span> create_react_agent
+
+<span class="comment"># Tool 1: RAG Retriever</span>
+retriever_tool = create_retriever_tool(
+    retriever,
+    name=<span class="string">"search_ai_docs"</span>,
+    description=<span class="string">"""
+    AI agents, LLM applications, task decomposition hakkında sorular için kullan.
+    Bu dokümanlarda Lilian Weng'in AI agents üzerine yazıları var.
+    """</span>
+)
+
+<span class="comment"># Tool 2: Hesap Makinesi</span>
+<span class="function">@tool</span>
+<span class="keyword">def</span> <span class="function">calculator</span>(expression: str) -> str:
+    <span class="string">"""Matematiksel hesaplamalar yapmak için kullan. Örnek: '2 + 2' veya '100 * 50'"""</span>
+    <span class="keyword">try</span>:
+        result = eval(expression)
+        <span class="keyword">return</span> f<span class="string">"📊 Sonuç: {result}"</span>
+    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:
+        <span class="keyword">return</span> f<span class="string">"❌ Hata: {str(e)}"</span>
+
+<span class="comment"># Tool 3: Güncel Saat</span>
+<span class="function">@tool</span>
+<span class="keyword">def</span> <span class="function">get_current_time</span>() -> str:
+    <span class="string">"""Güncel tarih ve saat bilgisini almak için kullan"""</span>
+    <span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+    now = datetime.now()
+    <span class="keyword">return</span> f<span class="string">"🕐 Şu an: {now.strftime('%Y-%m-%d %H:%M:%S')}"</span>
+
+<span class="comment"># Agent oluştur</span>
+tools = [retriever_tool, calculator, get_current_time]
+agent = create_react_agent(model, tools)
+
+<span class="comment"># Kullan</span>
+response = agent.invoke({
+    <span class="string">"messages"</span>: [(<span class="string">"user"</span>, <span class="string">"What is task decomposition and what is 100+50?"</span>)]
+})
+                </div>
+
+                <h3>🎓 En İyi Pratikler</h3>
+                <ul class="feature-list">
+                    <li><strong>Tool Description:</strong> Agent'ın karar vermesi için detaylı açıklama yazın</li>
+                    <li><strong>3-7 Tool:</strong> Çok fazla tool karışıklık yaratır</li>
+                    <li><strong>Hata Yönetimi:</strong> Her tool exception handling içermeli</li>
+                    <li><strong>Type Hints:</strong> Fonksiyon parametrelerinde tip belirtin</li>
+                    <li><strong>Test:</strong> Her tool'u ayrı ayrı test edin</li>
+                    <li><strong>Dokümantasyon:</strong> Docstring mutlaka olmalı</li>
+                </ul>
+
+                <div class="alert alert-success">
+                    <strong>✅ Projenizde:</strong> <code>simple_tool_rag.py</code> başarıyla çalıştı! 
+                    Agent, "What is task decomposition?" sorusuna retriever tool'u kullanarak doğru cevap verdi.
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Section -->
+        <div id="practice" class="content-section">
+            <div class="card">
+                <h2>🎯 Pratik Örnekler ve Uygulamalar</h2>
+                
+                <h3>📝 Öğrenme Yolunuz</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>1. Basic RAG (basic_rag.py)</h4>
+                            <p><strong>Öğrenilenler:</strong></p>
+                            <ul>
+                                <li>WebBaseLoader ile veri yükleme</li>
+                                <li>RecursiveCharacterTextSplitter ile chunking</li>
+                                <li>Chroma ile index oluşturma</li>
+                                <li>Retriever kullanımı</li>
+                                <li>LLM chain oluşturma</li>
+                            </ul>
+                            <p><strong>Çıktı:</strong> "What is task decomposition?" sorusuna başarılı cevap</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>2. Chroma DB Exploration</h4>
+                            <p><strong>Araçlar:</strong></p>
+                            <ul>
+                                <li>chroma_explorer.py - Database analizi</li>
+                                <li>chroma_interactive.py - Terminal UI</li>
+                                <li>chroma_web_viewer.py - Web interface</li>
+                            </ul>
+                            <p><strong>Kazanım:</strong> 126 döküman, 90K+ karakter başarıyla indekslendi</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>3. Embeddings Mastery</h4>
+                            <p><strong>Öğrenilenler:</strong></p>
+                            <ul>
+                                <li>10 farklı embedding modeli incelendi</li>
+                                <li>Model karşılaştırmaları yapıldı</li>
+                                <li>all-mpnet-base-v2 seçildi (768 dim)</li>
+                                <li>Embedding kalitesi test edildi</li>
+                            </ul>
+                            <p><strong>Dosyalar:</strong> embedding_models.py, embeddings_rehber.md</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>4. Vector Database Comparison</h4>
+                            <p><strong>Karşılaştırılan DB'ler:</strong></p>
+                            <ul>
+                                <li>Chroma - Prototip için seçildi</li>
+                                <li>FAISS - Hız için alternatif</li>
+                                <li>Pinecone - Production için not edildi</li>
+                                <li>Weaviate, Qdrant, Milvus incelendi</li>
+                            </ul>
+                            <p><strong>Dosya:</strong> vector_databases.py (13 DB detaylı)</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>5. Indexes Deep Dive</h4>
+                            <p><strong>Öğrenilenler:</strong></p>
+                            <ul>
+                                <li>Index = Documents + Embeddings + Vector Store</li>
+                                <li>9 farklı arama yöntemi</li>
+                                <li>Retriever konfigürasyonu</li>
+                                <li>Metadata filtreleme</li>
+                                <li>Index bakımı</li>
+                            </ul>
+                            <p><strong>Demo:</strong> indexes_ornekleri.py başarıyla çalıştı</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h4>6. Tool-based RAG</h4>
+                            <p><strong>Başarılar:</strong></p>
+                            <ul>
+                                <li>simple_tool_rag.py çalıştı</li>
+                                <li>Agent karar mekanizması anlaşıldı</li>
+                                <li>Retriever tool oluşturuldu</li>
+                                <li>Multi-tool sistem tasarlandı</li>
+                            </ul>
+                            <p><strong>Sonuç:</strong> Agent akıllıca tool seçimi yapıyor!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📊 Proje İstatistikleri</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Kategori</th>
+                            <th>Dosya/Öğe</th>
+                            <th>Durum</th>
+                            <th>Not</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="4"><strong>RAG</strong></td>
+                            <td>basic_rag.py</td>
+                            <td><span class="badge badge-success">✓ Çalıştı</span></td>
+                            <td>6 adımlı temel RAG</td>
+                        </tr>
+                        <tr>
+                            <td>simple_tool_rag.py</td>
+                            <td><span class="badge badge-success">✓ Çalıştı</span></td>
+                            <td>Tek tool ile agent</td>
+                        </tr>
+                        <tr>
+                            <td>multi_tool_rag.py</td>
+                            <td><span class="badge badge-info">Hazır</span></td>
+                            <td>3 tool sistemi (API key gerekli)</td>
+                        </tr>
+                        <tr>
+                            <td>TOOL_BASED_RAG_REHBER.md</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>Detaylı dokümantasyon</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="4"><strong>Embeddings</strong></td>
+                            <td>embedding_models.py</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>10 model referansı</td>
+                        </tr>
+                        <tr>
+                            <td>vector_databases.py</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>13 DB karşılaştırması</td>
+                        </tr>
+                        <tr>
+                            <td>embeddings_rehber.md</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>Kapsamlı rehber</td>
+                        </tr>
+                        <tr>
+                            <td>test_embedding_models.py</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>Model test scripti</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2"><strong>Indexes</strong></td>
+                            <td>indexes_ornekleri.py</td>
+                            <td><span class="badge badge-success">✓ Çalıştı</span></td>
+                            <td>9 adımlı demo</td>
+                        </tr>
+                        <tr>
+                            <td>INDEXES_REHBER.md</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>Detaylı dokümantasyon</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="5"><strong>Chroma DB</strong></td>
+                            <td>chroma_explorer.py</td>
+                            <td><span class="badge badge-success">✓ Çalıştı</span></td>
+                            <td>126 döküman analizi</td>
+                        </tr>
+                        <tr>
+                            <td>chroma_interactive.py</td>
+                            <td><span class="badge badge-info">Hazır</span></td>
+                            <td>Terminal UI</td>
+                        </tr>
+                        <tr>
+                            <td>chroma_web_viewer.py</td>
+                            <td><span class="badge badge-info">Hazır</span></td>
+                            <td>Web interface (port 5000)</td>
+                        </tr>
+                        <tr>
+                            <td>chroma_quick_demo.py</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>Hızlı demo</td>
+                        </tr>
+                        <tr>
+                            <td>CHROMA_REHBER.md</td>
+                            <td><span class="badge badge-success">✓ Tamamlandı</span></td>
+                            <td>Kullanım rehberi</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>🚀 Sonraki Adımlar</h3>
+                <div class="visual-comparison">
+                    <div class="comparison-box good">
+                        <h4>📚 Daha Fazla Öğrenme</h4>
+                        <ul style="text-align: left;">
+                            <li>Streaming responses</li>
+                            <li>Multi-document RAG</li>
+                            <li>Query transformation</li>
+                            <li>Self-querying retriever</li>
+                            <li>Contextual compression</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-box good">
+                        <h4>🏗️ Production Hazırlık</h4>
+                        <ul style="text-align: left;">
+                            <li>Caching stratejileri</li>
+                            <li>Load balancing</li>
+                            <li>Monitoring & logging</li>
+                            <li>Error handling</li>
+                            <li>Security best practices</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>🎉 Tebrikler!</strong> RAG sistemlerinin temellerini başarıyla öğrendiniz. 
+                    Basic RAG'den tool-based agent sistemlerine kadar tüm aşamaları tamamladınız!
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>💡 Hızlı Referans Kodları</h2>
+                
+                <h3>🔍 1. Basit Arama</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain_community.vectorstores <span class="keyword">import</span> Chroma
+<span class="keyword">from</span> langchain_community.embeddings <span class="keyword">import</span> HuggingFaceEmbeddings
+
+embeddings = HuggingFaceEmbeddings(model_name=<span class="string">"sentence-transformers/all-mpnet-base-v2"</span>)
+vectorstore = Chroma(persist_directory=<span class="string">"./chroma_db"</span>, embedding_function=embeddings)
+
+results = vectorstore.similarity_search(<span class="string">"your query"</span>, k=<span class="string">4</span>)
+<span class="keyword">for</span> doc <span class="keyword">in</span> results:
+    <span class="keyword">print</span>(doc.page_content)
+                </div>
+
+                <h3>🎯 2. Metadata Filtreli Arama</h3>
+                <div class="code-block">
+results = vectorstore.similarity_search(
+    query=<span class="string">"machine learning"</span>,
+    k=<span class="string">3</span>,
+    filter={<span class="string">"topic"</span>: <span class="string">"ai"</span>, <span class="string">"year"</span>: <span class="string">2024</span>}
+)
+                </div>
+
+                <h3>📊 3. Skorlu Arama</h3>
+                <div class="code-block">
+results = vectorstore.similarity_search_with_score(<span class="string">"python"</span>, k=<span class="string">2</span>)
+<span class="keyword">for</span> doc, score <span class="keyword">in</span> results:
+    <span class="keyword">print</span>(f<span class="string">"Score: {score:.4f} - {doc.page_content[:50]}"</span>)
+                </div>
+
+                <h3>🔧 4. Retriever ile RAG Chain</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain.chains <span class="keyword">import</span> RetrievalQA
+<span class="keyword">from</span> langchain_anthropic <span class="keyword">import</span> ChatAnthropic
+
+llm = ChatAnthropic(model=<span class="string">"claude-3-haiku-20240307"</span>)
+retriever = vectorstore.as_retriever(search_kwargs={<span class="string">"k"</span>: <span class="string">4</span>})
+
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever,
+    return_source_documents=<span class="keyword">True</span>
+)
+
+result = qa_chain({<span class="string">"query"</span>: <span class="string">"What is task decomposition?"</span>})
+<span class="keyword">print</span>(result[<span class="string">"result"</span>])
+                </div>
+
+                <h3>🛠️ 5. Tool-based Agent</h3>
+                <div class="code-block">
+<span class="keyword">from</span> langchain_core.tools <span class="keyword">import</span> create_retriever_tool
+<span class="keyword">from</span> langgraph.prebuilt <span class="keyword">import</span> create_react_agent
+
+retriever_tool = create_retriever_tool(
+    retriever,
+    name=<span class="string">"search_docs"</span>,
+    description=<span class="string">"Searches documentation for information"</span>
+)
+
+agent = create_react_agent(llm, [retriever_tool])
+response = agent.invoke({<span class="string">"messages"</span>: [(<span class="string">"user"</span>, <span class="string">"your question"</span>)]})
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <h3>📚 LangChain RAG Öğrenme Modülü</h3>
+            <p>Bu modül, sıfırdan production-ready RAG sistemleri geliştirmeye kadar tüm aşamaları kapsar.</p>
+            <p style="margin-top: 15px;">
+                <strong>Kapsanan Konular:</strong> 
+                Basic RAG • Embeddings • Vector Databases • Indexes • Chroma DB • Tool-based RAG • Multi-Agent Systems
+            </p>
+            <p style="margin-top: 15px; color: var(--primary);">
+                ✨ Başarılar! Keep learning and building amazing RAG applications! 🚀
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function showSection(sectionId, element) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked tab
+            if (element) {
+                element.classList.add('active');
+            }
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s, transform 0.6s';
+            observer.observe(card);
+        });
+
+        // Print welcome message
+        console.log('%c🎓 LangChain RAG Öğrenme Modülü', 'color: #6366f1; font-size: 20px; font-weight: bold;');
+        console.log('%cTüm RAG konularını interactive bir şekilde öğrenin!', 'color: #8b5cf6; font-size: 14px;');
+    </script>
+</body>
+</html>
